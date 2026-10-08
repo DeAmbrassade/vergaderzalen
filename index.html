@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vergaderzalen vandaag</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #f0f0c9;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 2.5vh 3vw;
+    }
+
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 2vh;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 3.2vw;
+      font-weight: 700;
+      color: #2b2b1e;
+      letter-spacing: -0.01em;
+    }
+
+    #clock {
+      font-size: 3.2vw;
+      font-weight: 600;
+      color: #5a5a3f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #date {
+      font-size: 1.4vw;
+      color: #5a5a3f;
+      text-transform: capitalize;
+    }
+
+    main {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2.4vh;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 2vw;
+      padding: 1.8vh 2vw;
+      border-radius: 14px;
+      background: #d8dff7;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .time {
+      flex: 0 0 auto;
+      font-size: 1.9vw;
+      font-weight: 700;
+      color: rgba(0, 0, 0, 0.75);
+      min-width: 9vw;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .now-badge {
+      flex: 0 0 auto;
+      font-size: 1.1vw;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #ffffff;
+      background: #3ea87a;
+      padding: 0.5vh 0.9vw;
+      border-radius: 999px;
+    }
+
+    .room {
+      flex: 0 0 auto;
+      font-size: 1.4vw;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      min-width: 11vw;
+      margin-left: auto;
+      text-align: center;
+      padding: 0.6vh 1vw;
+      border-radius: 999px;
+    }
+
+    .title {
+      flex: 1 1 auto;
+      font-size: 1.9vw;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty:not([hidden]) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40vh;
+      font-size: 2vw;
+      color: #5a5a3f;
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 1.5vh;
+      text-align: right;
+      font-size: 1vw;
+      color: rgba(0, 0, 0, 0.35);
+    }
+
+    #logo {
+      position: fixed;
+      left: 3vw;
+      bottom: 2.5vh;
+      height: 8vh;
+      width: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="greeting"></h1>
+    <div style="text-align: right;">
+      <div id="clock">--:--</div>
+      <div id="date"></div>
+    </div>
+  </header>
+  <main>
+    <ul id="meetings-list"></ul>
+    <div class="empty" id="empty-state" hidden>Geen vergaderingen gepland vandaag</div>
+  </main>
+  <footer id="last-updated"></footer>
+  <img id="logo" src="/logo.svg" alt="De Ambrassade" />
+
+  <script>
+    const listEl = document.getElementById('meetings-list');
+    const emptyEl = document.getElementById('empty-state');
+    const clockEl = document.getElementById('clock');
+    const dateEl = document.getElementById('date');
+    const updatedEl = document.getElementById('last-updated');
+    const greetingEl = document.getElementById('greeting');
+
+    function formatTime(iso) {
+      const d = new Date(iso);
+      return d.toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function greetingForHour(hour) {
+      if (hour >= 5 && hour < 12) return 'Goeiemorgen';
+      if (hour >= 12 && hour < 17) return 'Goeiemiddag';
+      return 'Goeieavond';
+    }
+
+    function updateClock() {
+      const now = new Date();
+      clockEl.textContent = now.toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' });
+      dateEl.textContent = now.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' });
+      greetingEl.textContent = greetingForHour(now.getHours());
+    }
+
+    function render(meetings) {
+      listEl.innerHTML = '';
+
+      const now = new Date();
+      const upcoming = meetings.filter((meeting) => new Date(meeting.end) >= now).slice(0, 6);
+
+      if (!upcoming.length) {
+        emptyEl.hidden = false;
+        return;
+      }
+      emptyEl.hidden = true;
+
+      for (const meeting of upcoming) {
+        const li = document.createElement('li');
+
+        const timeLabel = meeting.allDay
+          ? 'Hele dag'
+          : `${formatTime(meeting.start)} – ${formatTime(meeting.end)}`;
+
+        const isOngoing = !meeting.allDay && new Date(meeting.start) <= now && now <= new Date(meeting.end);
+        const nowBadge = isOngoing ? '<span class="now-badge">Nu bezig</span>' : '';
+
+        li.innerHTML = `
+          <span class="time">${timeLabel}</span>
+          ${nowBadge}
+          <span class="title">${meeting.title}</span>
+          <span class="room" style="background:${meeting.roomColor}; color:${meeting.roomTextColor}">${meeting.room}</span>
+        `;
+        listEl.appendChild(li);
+      }
+    }
+
+    async function loadMeetings() {
+      try {
+        const res = await fetch('/api/meetings', { cache: 'no-store' });
+        const data = await res.json();
+        render(data.meetings || []);
+        updatedEl.textContent = 'Laatst bijgewerkt: ' + new Date(data.generatedAt).toLocaleTimeString('nl-BE');
+      } catch (err) {
+        updatedEl.textContent = 'Kon vergaderingen niet laden';
+        console.error(err);
+      }
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000 * 15);
+    loadMeetings();
+    setInterval(loadMeetings, 1000 * 60 * 2);
+  </script>
+</body>
+</html>
