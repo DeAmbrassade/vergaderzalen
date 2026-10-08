@@ -1,630 +1,243 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WAT WAT</title>
-<link rel="icon" type="image/svg+xml" href="./images/logo-nieuw.svg">
-<style>
-  /* Faro Display and PP Neue Montreal — self-hosted from ./fonts */
-  @font-face{
-    font-family:'Faro Display';
-    src: url('./fonts/FaroWeb-DisplayLucky.woff') format('woff');
-    font-weight: 400 800;
-    font-display: swap;
-  }
-  @font-face{
-    font-family:'PP Neue Montreal';
-    src: url('./fonts/PPNeueMontreal-Regular.woff') format('woff');
-    font-weight: 400;
-    font-display: swap;
-  }
-  @font-face{
-    font-family:'PP Neue Montreal';
-    src: url('./fonts/PPNeueMontreal-Bold.woff') format('woff');
-    font-weight: 600 800;
-    font-display: swap;
-  }
-  :root{
-    --ink:#0B1F3A;
-    --paper:#FFFFFF;
-    --bg:#EAF3FF;
-    --dilemma:#0770F3;
-    --doen:#00BEA3;
-    --spel:#F09ECD;
-    --spicy:#F09ECD;
-    --accent-light:#83B8F9;
-    --deck-shadow: rgba(7,112,243,0.18);
-  }
-  *{box-sizing:border-box;}
-  html,body{height:100%;}
-  html{ overflow-x:hidden; }
-  body{
-    position:relative;
-    margin:0;
-    min-height:100vh;
-    overflow-x:hidden;
-    background: radial-gradient(circle at 18% -10%, var(--accent-light) 0%, var(--bg) 45%, var(--bg) 100%);
-    font-family:'PP Neue Montreal', 'Work Sans', sans-serif;
-    color:var(--ink);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding: 32px 20px 48px;
-    transition: background 0.4s ease;
-  }
-  body.spicy{
-    background: radial-gradient(circle at 18% -10%, var(--spicy) 0%, #FFF1F8 45%, #FFF1F8 100%);
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vergaderzalen vandaag</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
 
-  /* decorative brand doodles, scattered around the page */
-  .doodle{
-    position:absolute;
-    z-index:0;
-    pointer-events:none;
-    height:auto;
-  }
-  .doodle-01{ top:14px; left:2%; width:min(120px, 22vw); transform:rotate(-6deg); }
-  .doodle-02{ top:8px; right:1%; width:min(100px, 20vw); transform:rotate(8deg) scaleX(-1); }
-  .doodle-03{ top:210px; right:3%; width:min(56px, 12vw); transform:rotate(14deg); }
-  .doodle-05{ bottom:10px; left:1%; width:min(88px, 16vw); transform:rotate(-10deg); }
+    * {
+      box-sizing: border-box;
+    }
 
-  .doodle-arrow{
-    display:block;
-    width:min(120px, 26vw);
-    height:auto;
-    margin: 2px auto 14px;
-    opacity:0.9;
-  }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #f0f0c9;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
 
-  .hero{
-    position:relative;
-    z-index:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-  .logo-heading{ margin:8px 0 2px; }
-  .logo-heading img{
-    display:block;
-    height: clamp(72px, 18vw, 108px);
-    width:auto;
-    filter: drop-shadow(0 10px 18px rgba(7,112,243,0.28));
-  }
-  .sub-wrap{
-    position:relative;
-    display:inline-block;
-    margin: 6px 0 30px;
-  }
-  .sub-wrap .highlight-mark{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform: translate(-50%,-45%);
-    width: 130%;
-    max-width:none;
-    height:auto;
-    z-index:-1;
-    opacity:0.85;
-  }
-  .sub{
-    position:relative;
-    font-size:0.95rem;
-    font-weight:600;
-    text-align:center;
-    padding: 2px 4px;
-  }
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 2.5vh 3vw;
+    }
 
-  .mode-toggle{
-    position:relative;
-    z-index:1;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin: -6px 0 26px;
-    padding: 8px 16px;
-    background: var(--paper);
-    border-radius: 999px;
-    box-shadow: 0 6px 16px rgba(11,31,58,0.12);
-  }
-  .mode-toggle .mode-label{
-    font-size:0.85rem;
-    font-weight:600;
-    opacity:0.55;
-    transition: opacity 0.2s ease, color 0.2s ease;
-  }
-  .mode-toggle .mode-label.active{
-    opacity:1;
-    color: var(--spicy);
-  }
-  .mode-toggle .mode-label:first-child.active{ color: var(--dilemma); }
-  .switch{
-    position:relative;
-    width:46px;
-    height:26px;
-    flex-shrink:0;
-  }
-  .switch input{
-    position:absolute;
-    inset:0;
-    opacity:0;
-    margin:0;
-    cursor:pointer;
-    z-index:1;
-  }
-  .switch .track{
-    position:absolute;
-    inset:0;
-    background: var(--accent-light);
-    border-radius:999px;
-    transition: background 0.25s ease;
-  }
-  .switch .thumb{
-    position:absolute;
-    top:3px;
-    left:3px;
-    width:20px;
-    height:20px;
-    border-radius:50%;
-    background: var(--paper);
-    box-shadow: 0 2px 6px rgba(11,31,58,0.3);
-    transition: transform 0.25s ease;
-  }
-  .switch input:checked + .track{ background: var(--spicy); }
-  .switch input:checked ~ .thumb{ transform: translateX(20px); }
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 2vh;
+    }
 
-  .stage{
-    width:100%;
-    max-width: 300px;
-    perspective: 1200px;
-    margin: 0 auto 28px;
-  }
-  .card{
-    position:relative;
-    width:100%;
-    aspect-ratio: 5 / 7;
-    background: var(--paper);
-    color: var(--ink);
-    border-radius: 22px;
-    padding: 30px 24px;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    overflow-y:auto;
-    box-shadow: 0 18px 40px var(--deck-shadow), 0 2px 0 rgba(255,255,255,0.06) inset;
-    transform-style:preserve-3d;
-    transform: rotateY(0deg) rotate(-1.5deg);
-    transition: transform 0.45s cubic-bezier(.2,.8,.2,1);
-  }
-  .card.has-video{ aspect-ratio: auto; justify-content:flex-start; }
-  .card.flipping{ transform: rotateY(90deg) rotate(-1.5deg); }
-  .card::before, .card::after{
-    content: attr(data-mark);
-    position:absolute;
-    font-family:'Faro Display', 'Baloo 2', sans-serif;
-    font-weight:700;
-    font-size:0.66rem;
-    letter-spacing:0.5px;
-    text-transform:uppercase;
-    line-height:1;
-    white-space:nowrap;
-    padding:6px 12px;
-    border-radius:999px;
-    background: var(--accent, var(--ink));
-    color: var(--paper);
-  }
-  .card[data-mark=""]::before, .card[data-mark=""]::after{ display:none; }
-  .card::before{ top:14px; left:14px; }
-  .card::after{ bottom:14px; right:14px; transform: rotate(180deg); }
+    h1 {
+      margin: 0;
+      font-size: 3.2vw;
+      font-weight: 700;
+      color: #2b2b1e;
+      letter-spacing: -0.01em;
+    }
 
-  .card .eyebrow{
-    display:inline-block;
-    align-self:flex-start;
-    font-family:'Faro Display', 'Baloo 2', sans-serif;
-    font-weight:700;
-    font-size:0.78rem;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: var(--accent, var(--ink));
-    color: var(--paper);
-    margin-bottom: 14px;
-  }
-  .card .body-text{
-    font-size: 1.28rem;
-    line-height:1.42;
-    font-weight:600;
-  }
-  .dilemma-lines{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:10px;
-    text-align:center;
-    width:100%;
-  }
-  .dilemma-option{
-    font-size: 1.2rem;
-    line-height:1.4;
-    font-weight:600;
-  }
-  .dilemma-divider{
-    font-family:'Faro Display', 'Baloo 2', sans-serif;
-    font-weight:800;
-    font-size:0.85rem;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color: var(--accent, var(--ink));
-    opacity:0.7;
-  }
-  .card .hint{
-    margin-top:16px;
-    font-size:0.85rem;
-    opacity:0.55;
-    font-weight:400;
-  }
-  .card.placeholder .body-text{ font-weight:400; font-size:1.05rem; opacity:0.8; }
-  .card iframe{
-    width:100%;
-    aspect-ratio:16/9;
-    border:0;
-    border-radius:14px;
-    margin-top: 4px;
-  }
+    #clock {
+      font-size: 3.2vw;
+      font-weight: 600;
+      color: #5a5a3f;
+      font-variant-numeric: tabular-nums;
+    }
 
-  .deck-behind{
-    position:absolute;
-    inset:0;
-    border-radius:22px;
-    background: var(--accent-light);
-    opacity:0.55;
-    transform: rotate(2.5deg) translateY(6px);
-    z-index:-1;
-  }
-  .stage{ position:relative; z-index:1; }
+    #date {
+      font-size: 1.4vw;
+      color: #5a5a3f;
+      text-transform: capitalize;
+    }
 
-  .buttons{
-    position:relative;
-    z-index:1;
-    width:100%;
-    max-width: 440px;
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:16px;
-    margin-bottom: 6px;
-  }
-  .buttons-spel{
-    position:relative;
-    z-index:1;
-    width:100%;
-    max-width: 440px;
-    margin-top: 22px;
-  }
-  button.big{
-    width:100%;
-    font-family:'Faro Display', 'Baloo 2', sans-serif;
-    font-weight:700;
-    font-size:1.15rem;
-    color: var(--ink);
-    border:none;
-    border-radius:18px;
-    padding: 20px 22px;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    box-shadow: 0 8px 0 rgba(11,31,58,0.18), 0 10px 24px rgba(11,31,58,0.16);
-    transform: translateY(0);
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-  }
-  button.big:active{
-    transform: translateY(6px);
-    box-shadow: 0 2px 0 rgba(11,31,58,0.18), 0 4px 10px rgba(11,31,58,0.14);
-  }
-  button.big small{
-    display:block;
-    font-family:'PP Neue Montreal', 'Work Sans', sans-serif;
-    font-weight:400;
-    font-size:0.75rem;
-    opacity:0.65;
-    margin-top:2px;
-  }
-  button.big .arrow{ font-size:1.3rem; opacity:0.5; }
-  #btn-dilemma{ background: var(--dilemma); color: var(--paper); }
-  #btn-doen{ background: var(--doen); color: var(--paper); }
-  #btn-spel{
-    background: var(--spel);
-    color: var(--ink);
-  }
-  @media (max-width: 420px){
-    button.big{ font-size:1rem; padding:18px; }
-    button.big span:first-child{ display:flex; flex-direction:column; }
-  }
+    main {
+      flex: 1;
+      overflow: hidden;
+    }
 
-  .footnote{
-    margin-top:30px;
-    font-size:0.75rem;
-    opacity:0.4;
-    text-align:center;
-  }
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2.4vh;
+    }
 
-  @media (prefers-reduced-motion: reduce){
-    .card, button.big{ transition:none; }
-  }
-</style>
+    li {
+      display: flex;
+      align-items: center;
+      gap: 2vw;
+      padding: 1.8vh 2vw;
+      border-radius: 14px;
+      background: #d8dff7;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .time {
+      flex: 0 0 auto;
+      font-size: 1.9vw;
+      font-weight: 700;
+      color: rgba(0, 0, 0, 0.75);
+      min-width: 9vw;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .now-badge {
+      flex: 0 0 auto;
+      font-size: 1.1vw;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #ffffff;
+      background: #3ea87a;
+      padding: 0.5vh 0.9vw;
+      border-radius: 999px;
+    }
+
+    .room {
+      flex: 0 0 auto;
+      font-size: 1.4vw;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      min-width: 11vw;
+      margin-left: auto;
+      text-align: center;
+      padding: 0.6vh 1vw;
+      border-radius: 999px;
+    }
+
+    .title {
+      flex: 1 1 auto;
+      font-size: 1.9vw;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty:not([hidden]) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40vh;
+      font-size: 2vw;
+      color: #5a5a3f;
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 1.5vh;
+      text-align: right;
+      font-size: 1vw;
+      color: rgba(0, 0, 0, 0.35);
+    }
+
+    #logo {
+      position: fixed;
+      left: 3vw;
+      bottom: 2.5vh;
+      height: 8vh;
+      width: auto;
+    }
+  </style>
 </head>
 <body>
-
-  <img class="doodle doodle-01" src="./images/lijnen-01.svg" alt="" aria-hidden="true">
-  <img class="doodle doodle-02" src="./images/lijnen-02.svg" alt="" aria-hidden="true">
-  <img class="doodle doodle-03" src="./images/lijnen-03.svg" alt="" aria-hidden="true">
-  <img class="doodle doodle-05" src="./images/lijnen-05.svg" alt="" aria-hidden="true">
-
-  <div class="hero">
-    <h1 class="logo-heading"><img src="./images/logo-nieuw.svg" alt="WAT WAT"></h1>
-    <div class="sub-wrap">
-      <img class="highlight-mark" src="./images/HIGHLIGHT.svg" alt="" aria-hidden="true">
-      <div class="sub">Kies een optie:</div>
+  <header>
+    <h1 id="greeting"></h1>
+    <div style="text-align: right;">
+      <div id="clock">--:--</div>
+      <div id="date"></div>
     </div>
-  </div>
+  </header>
+  <main>
+    <ul id="meetings-list"></ul>
+    <div class="empty" id="empty-state" hidden>Geen vergaderingen gepland vandaag</div>
+  </main>
+  <footer id="last-updated"></footer>
+  <img id="logo" src="/logo.svg" alt="De Ambrassade" />
 
-  <div class="mode-toggle">
-    <span class="mode-label active" id="label-normal">Normaal</span>
-    <label class="switch">
-      <input type="checkbox" id="spicy-toggle" aria-label="Spicy mode">
-      <span class="track"></span>
-      <span class="thumb"></span>
-    </label>
-    <span class="mode-label" id="label-spicy">🌶️ Spicy</span>
-  </div>
+  <script>
+    const listEl = document.getElementById('meetings-list');
+    const emptyEl = document.getElementById('empty-state');
+    const clockEl = document.getElementById('clock');
+    const dateEl = document.getElementById('date');
+    const updatedEl = document.getElementById('last-updated');
+    const greetingEl = document.getElementById('greeting');
 
-  <div class="buttons">
-    <button class="big" id="btn-dilemma">
-      <span>🤔 Dilemma<small>Kies tussen twee opties</small></span>
-      <span class="arrow">›</span>
-    </button>
-    <button class="big" id="btn-doen">
-      <span>🔥 Doen / Waarheid<small>Opdracht of eerlijk antwoord</small></span>
-      <span class="arrow">›</span>
-    </button>
-  </div>
-
-  <img class="doodle-arrow" src="./images/lijnen-04.svg" alt="" aria-hidden="true">
-
-  <div class="stage">
-    <div class="deck-behind"></div>
-    <div class="card placeholder" id="card" data-mark="">
-      <div class="body-text" id="card-body">Druk op een knop om te beginnen.</div>
-    </div>
-  </div>
-
-  <div class="buttons-spel">
-    <button class="big" id="btn-spel">
-      <span>🎬 Speluitleg<small>Bekijk hoe het spel werkt</small></span>
-      <span class="arrow">›</span>
-    </button>
-  </div>
-
-  <div class="footnote">Kaarten komen live uit het spreadsheet</div>
-
-<script>
-  // ---- CONFIG ----
-  const SHEET_ID = '1O7XvLeFiLn0EawpQCRXTeSXTDB-QmE6Uh37Q-U3TckA';
-  const TAB_DILEMMA = "Nieuwe dilemma's";
-  const TAB_DOEN = 'Doen/waarheid';
-  const TAB_DILEMMA_SPICY = "Spicy dilemma's";
-  const TAB_DOEN_SPICY = 'Spicy doen/waarheid';
-  // Set this to a YouTube URL (e.g. 'https://www.youtube.com/watch?v=XXXXXXXXXXX')
-  // once the explainer video exists. Leave empty for the placeholder state.
-  const VIDEO_URL = '';
-
-  let spicyMode = false;
-
-  const card = document.getElementById('card');
-  const cardBody = document.getElementById('card-body');
-  const spicyToggle = document.getElementById('spicy-toggle');
-
-  const cache = {}; // tabName -> array of rows
-  const lastIndex = {}; // key -> last shown index
-
-  function parseCSV(text){
-    const rows = [];
-    let row = [], field = '', inQuotes = false;
-    for(let i=0; i<text.length; i++){
-      const c = text[i];
-      if(inQuotes){
-        if(c === '"'){
-          if(text[i+1] === '"'){ field += '"'; i++; }
-          else { inQuotes = false; }
-        } else { field += c; }
-      } else {
-        if(c === '"'){ inQuotes = true; }
-        else if(c === ','){ row.push(field); field=''; }
-        else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
-        else if(c === '\r'){ /* skip */ }
-        else { field += c; }
-      }
+    function formatTime(iso) {
+      const d = new Date(iso);
+      return d.toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' });
     }
-    if(field.length || row.length){ row.push(field); rows.push(row); }
-    return rows.filter(r => r.some(f => f && f.trim().length));
-  }
 
-  async function getTab(tabName){
-    if(cache[tabName]) return cache[tabName];
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('Kan het spreadsheet niet laden');
-    const text = await res.text();
-    const rows = parseCSV(text);
-    const data = rows.slice(1); // drop header row
-    cache[tabName] = data;
-    return data;
-  }
-
-  function pickRandom(rows, tabName){
-    if(!rows.length) return null;
-    if(rows.length === 1) return rows[0];
-    let idx;
-    do { idx = Math.floor(Math.random() * rows.length); }
-    while(idx === lastIndex[tabName]);
-    lastIndex[tabName] = idx;
-    return rows[idx];
-  }
-
-  function pickRandomFrom(list, key){
-    if(!list.length) return null;
-    if(list.length === 1) return list[0];
-    let idx;
-    do { idx = Math.floor(Math.random() * list.length); }
-    while(idx === lastIndex[key]);
-    lastIndex[key] = idx;
-    return list[idx];
-  }
-
-  function renderCard({ mark, accent, eyebrow, body, lines, isPlaceholder, iframeSrc }){
-    card.classList.add('flipping');
-    setTimeout(() => {
-      card.style.setProperty('--accent', accent || 'var(--ink)');
-      card.setAttribute('data-mark', mark || '');
-      card.classList.toggle('placeholder', !!isPlaceholder);
-      card.classList.toggle('has-video', !!iframeSrc);
-      card.innerHTML = '';
-
-      if(eyebrow){
-        const badge = document.createElement('div');
-        badge.className = 'eyebrow';
-        badge.textContent = eyebrow;
-        card.appendChild(badge);
-      }
-
-      if(lines && lines.length){
-        const wrap = document.createElement('div');
-        wrap.className = 'dilemma-lines';
-        lines.forEach(line => {
-          const lineEl = document.createElement('div');
-          lineEl.className = line.divider ? 'dilemma-divider' : 'dilemma-option';
-          lineEl.textContent = line.text;
-          wrap.appendChild(lineEl);
-        });
-        card.appendChild(wrap);
-      } else {
-        const bodyEl = document.createElement('div');
-        bodyEl.className = 'body-text';
-        bodyEl.textContent = body;
-        card.appendChild(bodyEl);
-      }
-
-      if(iframeSrc){
-        const iframe = document.createElement('iframe');
-        iframe.src = iframeSrc;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        card.appendChild(iframe);
-      }
-
-      card.classList.remove('flipping');
-    }, 220);
-  }
-
-  function getYouTubeEmbed(url){
-    try{
-      const u = new URL(url);
-      let id = '';
-      if(u.hostname.includes('youtu.be')) id = u.pathname.slice(1);
-      else if(u.searchParams.get('v')) id = u.searchParams.get('v');
-      else if(u.pathname.includes('/embed/')) id = u.pathname.split('/embed/')[1];
-      return id ? `https://www.youtube.com/embed/${id}` : null;
-    } catch(e){ return null; }
-  }
-
-  document.getElementById('btn-spel').addEventListener('click', () => {
-    const embed = VIDEO_URL ? getYouTubeEmbed(VIDEO_URL) : null;
-    if(embed){
-      renderCard({
-        mark: '▶',
-        accent: 'var(--spel)',
-        eyebrow: 'Speluitleg',
-        body: '',
-        iframeSrc: embed
-      });
-    } else {
-      renderCard({
-        mark: '▶',
-        accent: 'var(--spel)',
-        eyebrow: 'Speluitleg',
-        body: 'De uitlegvideo is nog niet toegevoegd. Zodra hij klaar is, verschijnt hij hier vanzelf.',
-        isPlaceholder: true
-      });
+    function greetingForHour(hour) {
+      if (hour >= 5 && hour < 12) return 'Goeiemorgen';
+      if (hour >= 12 && hour < 17) return 'Goeiemiddag';
+      return 'Goeieavond';
     }
-  });
 
-  document.getElementById('btn-dilemma').addEventListener('click', async () => {
-    renderCard({ mark:'Dilemma', accent:'var(--dilemma)', eyebrow:'Laden…', body:'', isPlaceholder:true });
-    try{
-      const tabName = spicyMode ? TAB_DILEMMA_SPICY : TAB_DILEMMA;
-      const rows = await getTab(tabName);
-      const columnA = rows.map(r => (r[0] || '').trim()).filter(Boolean);
-      const columnB = rows.map(r => (r[1] || '').trim()).filter(Boolean);
-      const optionA = pickRandomFrom(columnA, tabName + '-a');
-      const optionB = pickRandomFrom(columnB, tabName + '-b');
-      const eyebrow = spicyMode ? '🌶️ Dilemma' : 'Dilemma';
-      if(!optionA || !optionB){
-        renderCard({ mark:'Dilemma', accent:'var(--dilemma)', eyebrow, body:'Geen dilemma\'s gevonden in het spreadsheet.', isPlaceholder:true });
+    function updateClock() {
+      const now = new Date();
+      clockEl.textContent = now.toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' });
+      dateEl.textContent = now.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' });
+      greetingEl.textContent = greetingForHour(now.getHours());
+    }
+
+    function render(meetings) {
+      listEl.innerHTML = '';
+
+      const now = new Date();
+      const upcoming = meetings.filter((meeting) => new Date(meeting.end) >= now).slice(0, 6);
+
+      if (!upcoming.length) {
+        emptyEl.hidden = false;
         return;
       }
-      const textB = /[.?!]$/.test(optionB) ? optionB : optionB + '?';
-      renderCard({
-        mark:'Dilemma',
-        accent:'var(--dilemma)',
-        eyebrow,
-        lines: [
-          { text: optionA },
-          { text: 'of', divider:true },
-          { text: textB }
-        ]
-      });
-    } catch(e){
-      renderCard({ mark:'Dilemma', accent:'var(--dilemma)', eyebrow:'Fout', body:'Kon het spreadsheet niet laden. Controleer de verbinding en probeer opnieuw.', isPlaceholder:true });
-    }
-  });
+      emptyEl.hidden = true;
 
-  document.getElementById('btn-doen').addEventListener('click', async () => {
-    renderCard({ mark:'Doen / Waarheid', accent:'var(--doen)', eyebrow:'Laden…', body:'', isPlaceholder:true });
-    try{
-      const tabName = spicyMode ? TAB_DOEN_SPICY : TAB_DOEN;
-      const rows = await getTab(tabName);
-      const picked = pickRandom(rows, tabName);
-      const fallbackMark = 'Doen / Waarheid';
-      const fallbackEyebrow = spicyMode ? '🌶️ Doen / Waarheid' : 'Doen / Waarheid';
-      if(!picked){
-        renderCard({ mark: fallbackMark, accent:'var(--doen)', eyebrow: fallbackEyebrow, body:'Geen vragen gevonden in het spreadsheet.', isPlaceholder:true });
-        return;
+      for (const meeting of upcoming) {
+        const li = document.createElement('li');
+
+        const timeLabel = meeting.allDay
+          ? 'Hele dag'
+          : `${formatTime(meeting.start)} – ${formatTime(meeting.end)}`;
+
+        const isOngoing = !meeting.allDay && new Date(meeting.start) <= now && now <= new Date(meeting.end);
+        const nowBadge = isOngoing ? '<span class="now-badge">Nu bezig</span>' : '';
+
+        li.innerHTML = `
+          <span class="time">${timeLabel}</span>
+          ${nowBadge}
+          <span class="title">${meeting.title}</span>
+          <span class="room" style="background:${meeting.roomColor}; color:${meeting.roomTextColor}">${meeting.room}</span>
+        `;
+        listEl.appendChild(li);
       }
-      const [type, text] = picked;
-      const typeTrimmed = (type || '').trim();
-      const typeLower = typeTrimmed.toLowerCase();
-      const label = typeLower === 'doen' ? 'Opdracht' : typeLower === 'waarheid' ? 'Vraag' : (typeTrimmed || fallbackEyebrow);
-      const eyebrow = spicyMode ? '🌶️ ' + label : label;
-      const mark = typeTrimmed || fallbackMark;
-      renderCard({ mark, accent:'var(--doen)', eyebrow, body: text || '' });
-    } catch(e){
-      renderCard({ mark:'Doen / Waarheid', accent:'var(--doen)', eyebrow:'Fout', body:'Kon het spreadsheet niet laden. Controleer de verbinding en probeer opnieuw.', isPlaceholder:true });
     }
-  });
 
-  spicyToggle.addEventListener('change', () => {
-    spicyMode = spicyToggle.checked;
-    document.body.classList.toggle('spicy', spicyMode);
-    document.getElementById('label-normal').classList.toggle('active', !spicyMode);
-    document.getElementById('label-spicy').classList.toggle('active', spicyMode);
-    renderCard({
-      mark:'',
-      accent: spicyMode ? 'var(--spicy)' : 'var(--ink)',
-      body: spicyMode ? 'Spicy mode aan 🌶️ — druk op een knop.' : 'Druk op een knop om te beginnen.',
-      isPlaceholder: true
-    });
-  });
-</script>
+    async function loadMeetings() {
+      try {
+        const res = await fetch('/api/meetings', { cache: 'no-store' });
+        const data = await res.json();
+        render(data.meetings || []);
+        updatedEl.textContent = 'Laatst bijgewerkt: ' + new Date(data.generatedAt).toLocaleTimeString('nl-BE');
+      } catch (err) {
+        updatedEl.textContent = 'Kon vergaderingen niet laden';
+        console.error(err);
+      }
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000 * 15);
+    loadMeetings();
+    setInterval(loadMeetings, 1000 * 60 * 2);
+  </script>
 </body>
 </html>
